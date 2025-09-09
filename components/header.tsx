@@ -1,20 +1,25 @@
-import { signIn } from '@/auth';
+import { auth } from '@/auth';
 import React from 'react'
+import { GoogleSignIn, SpotifySignIn, UserProfile } from './auth-buttons';
 
-const Header = () => {
+const Header = async () => {
+    const session = await auth();
+
     return (
-        <form className='border-b border-neutral-800 p-5 flex justify-between items-center'
-            action={async () => {
-                "use server"
-
-                await signIn("spotify", {
-                    callbackUrl: "/",
-                });
-            }}
-        >
+        <header className='border-b border-neutral-800 p-5 flex justify-between items-center'>
             <h1 className='text-2xl font-bold'>CineShelf</h1>
-            <button className='bg-green-500 text-black px-4 py-2 rounded-full font-semibold'>Sign in with Spotify</button>
-        </form>
+
+            {session?.user && (
+                <UserProfile name={session.user.name} image={session.user.image} />
+            )}
+
+            {!session?.user && (
+                <div className="flex space-x-4">
+                    <SpotifySignIn />
+                    <GoogleSignIn />
+                </div>
+            )}
+        </header>
     )
 }
 
