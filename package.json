@@ -10,6 +10,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.10.0",
+    "@vercel/postgres": "^0.10.0",
+    "dotenv": "^17.2.2",
+    "drizzle-orm": "^0.44.5",
     "next": "15.5.2",
     "next-auth": "5.0.0-beta.29",
     "react": "19.1.0",
@@ -21,9 +25,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5"
   }
 }
