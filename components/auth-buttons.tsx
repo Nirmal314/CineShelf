@@ -1,5 +1,6 @@
 import { signIn, signOut } from "@/auth";
 import Image from "next/image";
+import { Button } from "./ui/cool-button";
 
 const SpotifySignIn = () => {
     return (
@@ -9,7 +10,7 @@ const SpotifySignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <button className='bg-green-500 text-black px-4 py-2 rounded-full font-semibold'>Sign in with Spotify</button>
+            <Button icon="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" variant={"green"} size={"sm"}>Sign in with Spotify</Button>
         </form>
     )
 }
@@ -22,7 +23,7 @@ const GoogleSignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <button className='bg-blue-500 text-white px-4 py-2 rounded-full font-semibold'>Sign in with Google</button>
+            <Button icon="https://www.svgrepo.com/show/303108/google-icon-logo.svg" variant={"blue"} size={"sm"}>Sign in with Google</Button>
         </form>
     )
 }
@@ -39,7 +40,7 @@ const UserProfile = ({ image, name }: { image?: string | null, name?: string | n
                     redirectTo: "/"
                 });
             }}>
-                <button className='bg-red-500 text-white px-4 py-2 rounded-full font-semibold'>Sign out</button>
+                <Button variant={"red"} size={"xs"}>Sign out</Button>
             </form>
         </div>
     )
