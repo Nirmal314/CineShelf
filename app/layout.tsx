@@ -3,6 +3,7 @@ import { Gabriela } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Header from "@/components/header";
+import ClickSpark from "@/components/click-spark";
 
 const font = Gabriela({
   weight: "400",
@@ -22,14 +23,16 @@ export default function RootLayout({
 }>) {
   return (
     <SessionProvider>
-      <html lang="en">
-        <body
-          className={`${font.variable} antialiased`}
-        >
-          <Header />
-          {children}
-        </body>
-      </html>
+      <ClickSpark sparkColor='#99582a' duration={350}>
+        <html lang="en">
+          <body
+            className={`${font.variable} antialiased`}
+          >
+            <Header />
+            {children}
+          </body>
+        </html>
+      </ClickSpark>
     </SessionProvider>
   );
 }
