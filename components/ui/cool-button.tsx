@@ -53,7 +53,7 @@ const buttonTopVariants = cva(
         },
         defaultVariants: {
             variant: "default",
-            size: "xs",
+            size: "sm",
         },
     }
 )
