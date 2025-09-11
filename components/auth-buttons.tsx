@@ -10,7 +10,7 @@ const SpotifySignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <Button icon="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" variant={"green"} size={"sm"}>Sign in with Spotify</Button>
+            <Button icon="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" variant={"green"} size={"sm"}>Spotify</Button>
         </form>
     )
 }
@@ -23,7 +23,7 @@ const GoogleSignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <Button icon="https://www.svgrepo.com/show/303108/google-icon-logo.svg" variant={"blue"} size={"sm"}>Sign in with Google</Button>
+            <Button icon="https://www.svgrepo.com/show/303108/google-icon-logo.svg" variant={"blue"} size={"sm"}>Google</Button>
         </form>
     )
 }

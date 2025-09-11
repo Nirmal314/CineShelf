@@ -6,8 +6,8 @@ const Header = async () => {
     const session = await auth();
 
     return (
-        <header className='border-b border-neutral-800 p-5 flex justify-between items-center'>
-            <h1 className='text-2xl font-bold'>CineShelf</h1>
+        <header className='border-b border-neutral-800 p-5 flex justify-center sm:justify-between items-center'>
+            <h1 className='text-2xl font-bold hidden sm:block'>CineShelf</h1>
 
             {session?.user && (
                 <UserProfile name={session.user.name} image={session.user.image} />
