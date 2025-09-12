@@ -10,6 +10,7 @@
 - Minimal music player
 - Export music playlist to **spotify || yt-music**
 - Watchlist
+- Redirect to OTTs
 
 ---
 
