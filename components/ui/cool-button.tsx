@@ -15,6 +15,7 @@ const buttonVariants = cva(
                 yellow: "bg-yellow-600 rounded-xl",
                 orange: "bg-orange-700 rounded-xl",
                 blue: "bg-blue-800 rounded-xl",
+                warm: "bg-[#a0522d] rounded-xl"
             },
             size: {
                 default: "text-base",
@@ -42,6 +43,7 @@ const buttonTopVariants = cva(
                 yellow: "bg-yellow-200 text-yellow-600 border-yellow-600 rounded-xl",
                 orange: "bg-orange-200 text-orange-700 border-orange-700 rounded-xl",
                 blue: "bg-blue-200 text-blue-800 border-blue-800 rounded-xl",
+                warm: "bg-[#eae3d2] text-[#a0522d] border-[#a0522d] rounded-xl",
             },
             size: {
                 default: "-translate-y-1 hover:-translate-y-1.5 px-6 py-3",

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Gabriela } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-import Header from "@/components/header";
 import ClickSpark from "@/components/click-spark";
 
 const font = Gabriela({
@@ -13,7 +12,7 @@ const font = Gabriela({
 
 export const metadata: Metadata = {
   title: "CineShelf",
-  description: "A sheld to store and admire your movies and their musics!",
+  description: "A shelf to store and admire your movies and their musics!",
 };
 
 export default function RootLayout({
@@ -26,9 +25,8 @@ export default function RootLayout({
       <ClickSpark sparkColor='#99582a' duration={350}>
         <html lang="en">
           <body
-            className={`${font.variable} antialiased`}
+            className={`${font.variable} antialiased w-full min-h-screen bg-paper text-charcoal overflow-hidden`}
           >
-            <Header />
             {children}
           </body>
         </html>
