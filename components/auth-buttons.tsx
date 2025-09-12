@@ -28,19 +28,29 @@ const GoogleSignIn = () => {
     )
 }
 
-const UserProfile = ({ image, name }: { image?: string | null, name?: string | null }) => {
+const UserProfile = ({ image, name }: { image?: string | null; name?: string | null }) => {
     return (
-        <div className='flex items-center gap-3'>
-            <Image src={image || ""} alt={name || "User"} width={35} height={35} className='rounded-full' />
-            <span>{name || "User"}</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <Image
+                src={image || ""}
+                alt={name || "User"}
+                width={35}
+                height={35}
+                className="rounded-full"
+            />
+            <span className="text-sm sm:text-base">{name || "User"}</span>
 
-            <form action={async () => {
-                "use server"
-                await signOut({
-                    redirectTo: "/"
-                });
-            }}>
-                <Button variant={"red"} size={"xs"}>Sign out</Button>
+            <form
+                action={async () => {
+                    "use server"
+                    await signOut({
+                        redirectTo: "/",
+                    })
+                }}
+            >
+                <Button variant={"red"} size={"xs"}>
+                    Sign out
+                </Button>
             </form>
         </div>
     )

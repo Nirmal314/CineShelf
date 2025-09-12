@@ -2,7 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import Image from "next/image"
+import { LucideIcon } from "lucide-react"
 
 const buttonVariants = cva(
     "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-normal border-none cursor-pointer outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
@@ -33,7 +33,7 @@ const buttonVariants = cva(
 )
 
 const buttonTopVariants = cva(
-    `display-block box-border border-2 px-6 py-3 font-semibold transition-transform duration-100 ease-out transform active:translate-y-0`,
+    "display-block box-border border-2 px-6 py-3 font-semibold transition-transform duration-100 ease-out transform active:translate-y-0",
     {
         variants: {
             variant: {
@@ -61,8 +61,8 @@ const buttonTopVariants = cva(
 )
 
 interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
-    asChild?: boolean,
-    icon?: string
+    asChild?: boolean
+    icon?: string | LucideIcon
 }
 
 function Button({
@@ -82,16 +82,34 @@ function Button({
             {...props}
         >
             <span className={cn(buttonTopVariants({ variant, size }), "flex items-center gap-2")}>
-                {icon && <Image src={icon} className={
-                    cn(
-                        "shrink-0",
-                        size === "xs" && "size-3",
-                        size === "sm" && "size-4",
-                        size === "default" && "size-5",
-                        size === "lg" && "size-6",
-                        size === "icon" && "size-5"
-                    )
-                } alt="" width={20} height={20} />}
+                {typeof icon === "string" && (
+                    <img
+                        src={icon}
+                        className={cn(
+                            "shrink-0",
+                            size === "xs" && "size-3",
+                            size === "sm" && "size-4",
+                            size === "default" && "size-5",
+                            size === "lg" && "size-6",
+                            size === "icon" && "size-5"
+                        )}
+                        alt=""
+                    />
+                )}
+
+                {typeof icon === "function" && (
+                    React.createElement(icon, {
+                        className: cn(
+                            "shrink-0",
+                            size === "xs" && "size-3",
+                            size === "sm" && "size-4",
+                            size === "default" && "size-5",
+                            size === "lg" && "size-6",
+                            size === "icon" && "size-5"
+                        )
+                    })
+                )}
+
                 {children}
             </span>
         </Comp>

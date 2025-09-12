@@ -22,15 +22,15 @@ export default function RootLayout({
 }>) {
   return (
     <SessionProvider>
-      <ClickSpark sparkColor='#99582a' duration={350}>
-        <html lang="en">
-          <body
-            className={`${font.variable} antialiased w-full min-h-screen bg-paper text-charcoal overflow-hidden`}
-          >
+      <html lang="en">
+        <body
+          className={`${font.variable} antialiased bg-paper text-charcoal overflow-hidden`}
+        >
+          <ClickSpark sparkColor='#99582a' duration={350}>
             {children}
-          </body>
-        </html>
-      </ClickSpark>
+          </ClickSpark>
+        </body>
+      </html>
     </SessionProvider>
   );
 }
