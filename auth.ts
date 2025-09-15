@@ -16,8 +16,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [Google, Spotify],
   pages: {
     signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error", // Error code passed in query string as ?error=
   },
   callbacks: {
     async signIn({ user, account, profile }) {
