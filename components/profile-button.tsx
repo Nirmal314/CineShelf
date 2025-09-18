@@ -20,8 +20,8 @@ export function ProfileButton({ image, name, email }: Props) {
                     <Image
                         src={image}
                         alt={name}
-                        height={10}
-                        width={10}
+                        height={36}
+                        width={36}
                         className="rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
                     />
                 </PopoverTrigger>
@@ -29,7 +29,8 @@ export function ProfileButton({ image, name, email }: Props) {
                 <PopoverContent
                     align="end"
                     sideOffset={8}
-                    className="w-64 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 
+                    className="w-64 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200
+                    space-y-3
                     data-[state=open]:slide-in-from-left-20 
                     data-[state=open]:slide-in-from-top-0 
                     data-[state=open]:zoom-in-100 
@@ -37,24 +38,15 @@ export function ProfileButton({ image, name, email }: Props) {
                     data-[state=closed]:slide-out-to-top-0 
                     data-[state=closed]:zoom-out-100"
                 >
-                    <div className="flex items-center gap-3 mb-4">
-                        <Image
-                            src={image}
-                            alt={name}
-                            height={12}
-                            width={12}
-                            className="rounded-full border border-gray-200 shadow-sm"
-                        />
-                        <div>
-                            <p className="text-sm font-semibold text-gray-900">{name}</p>
-                            <p className="text-xs text-gray-500">{email}</p>
-                        </div>
+                    <div>
+                        <p className="text-sm font-sans text-gray-900">{name}</p>
+                        <p className="text-xs text-gray-500">{email}</p>
                     </div>
 
                     <Button
                         onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
                         variant="red"
-                        size="sm"
+                        size="xs"
                     >
                         <LogOut className="w-4 h-4 mr-1" />
                         Logout
