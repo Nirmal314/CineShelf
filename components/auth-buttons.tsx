@@ -1,5 +1,4 @@
-import { signIn, signOut } from "@/auth";
-import Image from "next/image";
+import { signIn } from "@/auth";
 import { Button } from "./ui/cool-button";
 
 const SpotifySignIn = () => {
@@ -10,7 +9,7 @@ const SpotifySignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <Button icon="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" variant={"green"} size={"sm"}>Spotify</Button>
+            <Button icon="/spotify.svg" variant={"green"} size={"sm"}>Spotify</Button>
         </form>
     )
 }
@@ -23,37 +22,9 @@ const GoogleSignIn = () => {
                 callbackUrl: "/",
             });
         }}>
-            <Button icon="https://www.svgrepo.com/show/303108/google-icon-logo.svg" variant={"blue"} size={"sm"}>Google</Button>
+            <Button icon="/google.svg" variant={"blue"} size={"sm"}>Google</Button>
         </form>
     )
 }
 
-const UserProfile = ({ image, name }: { image?: string | null; name?: string | null }) => {
-    return (
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-            <Image
-                src={image || ""}
-                alt={name || "User"}
-                width={35}
-                height={35}
-                className="rounded-full"
-            />
-            <span className="text-sm sm:text-base">{name || "User"}</span>
-
-            <form
-                action={async () => {
-                    "use server"
-                    await signOut({
-                        redirectTo: "/",
-                    })
-                }}
-            >
-                <Button variant={"red"} size={"xs"}>
-                    Sign out
-                </Button>
-            </form>
-        </div>
-    )
-}
-
-export { SpotifySignIn, GoogleSignIn, UserProfile }
+export { SpotifySignIn, GoogleSignIn }

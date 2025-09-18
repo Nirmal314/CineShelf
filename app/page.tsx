@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
-import { GoogleSignIn, SpotifySignIn, UserProfile } from "@/components/auth-buttons";
+import { GoogleSignIn, SpotifySignIn } from "@/components/auth-buttons";
 import { getFloatingItems } from "@/components/floating-items";
+import { ProfileButton } from "@/components/profile-button";
 
 const Index = async () => {
   const session = await auth()
@@ -65,7 +66,12 @@ const Index = async () => {
               </span>
             </p>
 
-            <UserProfile image={session.user.image} name={session.user.name} />
+            <ProfileButton
+              name={session.user.name || ""}
+              email={session.user.email || ""}
+              image={session.user.image || ""}
+            />
+
           </div>
         </div>
       </div>
