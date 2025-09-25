@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react"
 import { Button } from "./ui/cool-button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import Image from "next/image"
+import { useId } from "react"
 
 type Props = {
     image: string
@@ -13,22 +14,26 @@ type Props = {
 }
 
 export function ProfileButton({ image, name, email }: Props) {
+    const id = useId()
     return (
         <div className="fixed top-6 right-6 z-50">
             <Popover>
                 <PopoverTrigger asChild>
-                    <Image
-                        src={image}
-                        alt={name}
-                        height={36}
-                        width={36}
-                        className="rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
-                    />
+                    <button aria-controls={id}>
+                        <Image
+                            src={image}
+                            alt={name}
+                            height={36}
+                            width={36}
+                            className="rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                        />
+                    </button>
                 </PopoverTrigger>
 
                 <PopoverContent
                     align="end"
                     sideOffset={8}
+                    id={id}
                     className="w-64 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200
                     space-y-3
                     data-[state=open]:slide-in-from-left-20 
