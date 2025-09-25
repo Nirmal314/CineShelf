@@ -5,7 +5,7 @@ type GridProps = {
     children: React.ReactNode
 }
 
-const Grid: FC<GridProps> = ({ children, columns }) => {
+const Grid: FC<GridProps> = ({ children }) => {
     return (
         <div
             className="

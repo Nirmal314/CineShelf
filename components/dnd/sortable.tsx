@@ -73,7 +73,7 @@ export function SortableGrid<T extends { id: string; title?: string; subtitle?: 
                         <SortableItem
                             key={item.id}
                             id={item.id}
-                            index={index}
+                            // index={index}
                             wrapperStyle={() => (wrapperStyle ? wrapperStyle({ index, id: item.id }) : {})}
                             getItemStyles={() => (getItemStyles ? getItemStyles({ index, id: item.id }) : {})}
                             title={item.title}
@@ -91,7 +91,7 @@ export function SortableGrid<T extends { id: string; title?: string; subtitle?: 
 function SortableItem({
     id,
     children,
-    index,
+    // index,
     wrapperStyle,
     getItemStyles,
     title,
@@ -99,7 +99,7 @@ function SortableItem({
 }: {
     id: string;
     children: React.ReactNode;
-    index: number;
+    // index: number;
     wrapperStyle?: () => React.CSSProperties;
     getItemStyles?: () => React.CSSProperties;
     title?: string;
@@ -128,7 +128,7 @@ function SortableItem({
     };
 
     return (
-        <div ref={setNodeRef} style={outerStyle} {...attributes} {...(listeners as any)}>
+        <div ref={setNodeRef} style={outerStyle} {...attributes} {...listeners}>
             <div style={style}>
                 <Card className="shadow-sm">
                     {title || subtitle ? (
