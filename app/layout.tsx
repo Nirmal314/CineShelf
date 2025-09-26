@@ -24,7 +24,7 @@ export default function RootLayout({
     <SessionProvider>
       <html lang="en">
         <body
-          className={`${font.variable} antialiased bg-paper text-charcoal overflow-hidden`}
+          className={`${font.variable} antialiased bg-paper text-charcoal`}
         >
           <ClickSpark sparkColor='#99582a' duration={350}>
             {children}

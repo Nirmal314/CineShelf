@@ -7,7 +7,7 @@ import React from 'react'
 
 const Movies = ({ session }: { session: Session }) => {
     return (
-        <div className="relative z-10 flex min-h-screen items-center justify-center px-4 sm:px-6 md:px-8 border-4 border-red-700">
+        <div className="mt-10 relative z-10 flex min-h-screen items-start justify-center px-4 sm:px-6 md:px-8">
             <MoviesGrid />
 
             <ProfileButton
