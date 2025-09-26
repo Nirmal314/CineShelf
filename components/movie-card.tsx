@@ -48,26 +48,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
                     </div>
                 </div>
 
-                {/* Minimal info bar (always visible, hidden on hover) */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden group-hover:hidden">
-                    <div className="m-3 rounded-md bg-paper/90 p-3 backdrop-blur-md shadow-2xs">
-                        <h3 className="text-base font-semibold leading-tight text-wood">{movie.title}</h3>
-                        <p className="text-xs text-muted-foreground mb-1">Directed by {movie.director}</p>
-                        <div className="flex flex-wrap gap-1">
-                            {movie.genre.split(",").map((g) => (
-                                <Badge
-                                    key={g.trim()}
-                                    variant="secondary"
-                                    className="bg-warm-2/20 text-warm-1 border border-warm-2/30 px-2 py-0.5 text-[0.65rem]"
-                                >
-                                    {g.trim()}
-                                </Badge>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="absolute inset-0 z-20 flex flex-col justify-end bg-gradient-to-t from-paper/90 via-paper/70 to-transparent p-4 opacity-0 backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100">
+                <div className="absolute inset-0 z-20 flex flex-col justify-end bg-gradient-to-t from-paper/95 via-paper/50 to-transparent p-4 opacity-0 backdrop-blur-xl transition-all duration-300 ease-out group-hover:opacity-100">
                     <div className="mt-auto space-y-3">
                         <div className="flex items-center justify-between gap-3">
                             <h3 className="text-lg font-semibold leading-tight text-charcoal">{movie.title}</h3>
