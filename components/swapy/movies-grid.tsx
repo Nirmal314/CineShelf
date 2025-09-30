@@ -325,7 +325,9 @@ const MoviesGrid = () => {
                 animation: "spring",
                 autoScrollOnDrag: true
             })
-            swapy.current.onSwap((event) => console.log("swap", event))
+            // swapy.current.onSwap((event) => {})
+            // swapy.current.onSwapStart((event) => {})
+            // swapy.current.onSwapEnd((event) => {})
         }
         return () => swapy.current?.destroy()
     }, [cards])
