@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Movie } from "@/types"
 import Image from "next/image"
+import { AspectRatio } from "./ui/aspect-ratio"
 
 type MovieCardProps = {
     movie: Movie
@@ -22,7 +23,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
             aria-label={`${movie.title} movie card`}
         >
             <div className="relative">
-                <div className="aspect-[2/3] w-full bg-charcoal/20">
+                <AspectRatio ratio={2 / 3} className="bg-charcoal/20">
                     <Image
                         src={movie.poster || "/placeholder.svg"}
                         alt={`${movie.title} poster`}
@@ -34,7 +35,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
                         placeholder="blur"
                         blurDataURL={movie.poster || "/placeholder.svg"}
                     />
-                </div>
+                </AspectRatio>
 
                 <div className="absolute inset-0 z-20">
 
