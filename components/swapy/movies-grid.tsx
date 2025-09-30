@@ -352,7 +352,7 @@ const MoviesGrid = () => {
                         data-swapy-item={movie.imdbID}
                         className="cursor-grab active:cursor-grabbing w-full"
                     >
-                        <MovieCard movie={movie} />
+                        <MovieCard movie={movie} className='min-w-56' />
                     </div>
                 </div>
             ))}
