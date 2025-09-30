@@ -29,3 +29,20 @@ export type Movie = {
   //   website: string;
   //   response: string;
 };
+
+export type SearchedMovie = {
+  id: string;
+  type: string;
+  primaryTitle: string;
+  originalTitle: string;
+  primaryImage: {
+    url: string;
+    height: number;
+    width: number;
+  };
+  startYear: number;
+  rating: {
+    aggregateRating: number;
+    voteCount: number;
+  };
+};
