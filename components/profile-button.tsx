@@ -14,15 +14,20 @@ type Props = {
 
 export function ProfileButton({ image, name, email }: Props) {
     return (
-        <div className="fixed top-6 right-6 z-50">
+        <div className="fixed top-6 right-6 z-10">
             <Popover>
                 <PopoverTrigger asChild>
-                    <Image
+                    {/* <Image
                         src={image}
                         alt={name}
                         height={36}
                         width={36}
                         className="rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                    /> */}
+                    <img
+                        src={image || "/default-profile.png"}
+                        alt={name}
+                        className="w-9 h-9 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-shadow object-cover"
                     />
                 </PopoverTrigger>
 
