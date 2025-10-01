@@ -47,8 +47,6 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
 
         const displaced = Math.sqrt(x * x + y * y);
 
-        console.log(displaced)
-
         if (displaced > 5) { // threshold for drag
             draggingRef.current = true
         }
@@ -69,7 +67,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
                 onClick={handleClick}>
                 <Card
                     className={cn(
-                        "group py-0 relative overflow-hidden rounded-xl bg-paper text-charcoal shadow-soft hover:shadow-cinema transition-all",
+                        "group border-none py-0 relative overflow-hidden rounded-xl bg-paper text-charcoal shadow-lg hover:shadow-cinema transition-all",
                         className,
                     )}
                     aria-label={`${movie.title} movie card`}

@@ -32,17 +32,17 @@ export type Movie = {
 
 export type SearchedMovie = {
   id: string;
-  type: string;
+  type?: string;
   primaryTitle: string;
-  originalTitle: string;
-  primaryImage: {
+  originalTitle?: string;
+  primaryImage?: {
     url: string;
     height: number;
     width: number;
   };
   startYear: number;
-  rating: {
-    aggregateRating: number;
-    voteCount: number;
+  rating?: {
+    aggregateRating?: number;
+    voteCount?: number;
   };
 };
