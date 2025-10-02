@@ -12,6 +12,7 @@ import {
     AlertDialogTitle,
     AlertDialogDescription,
 } from "@/components/ui/alert-dialog"
+import { addMovie } from "@/actions/movies"
 
 type Props = {
     movies: SearchedMovie[] | null
@@ -27,8 +28,14 @@ const SearchedMovies = ({ movies, error }: Props) => {
         }
     }, [movies, error])
 
-    const handleAddMovie = (movie: SearchedMovie) => {
-        console.log("Adding movie:", movie)
+    const handleAddMovie = async (movie: SearchedMovie) => {
+        const resp = await addMovie({
+            id: movie.id,
+            title: movie.primaryTitle,
+            poster: movie.primaryImage?.url,
+        });
+
+        if (resp) setOpen(false)
     }
 
     if (!open) return null

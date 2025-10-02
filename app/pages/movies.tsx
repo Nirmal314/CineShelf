@@ -1,6 +1,6 @@
 import { ProfileButton } from '@/components/profile-button'
 import SearchMovies from '@/components/search-movies'
-import MoviesGrid from '@/components/swapy/movies-grid'
+import MoviesGrid from '@/components/movies-grid'
 import { Session } from 'next-auth'
 import React from 'react'
 

@@ -1,7 +1,12 @@
 "use server";
 
+import { auth } from "@/auth";
+import { db } from "@/db";
+import { movies } from "@/db/schema";
 import { tryCatch } from "@/lib/try-catch";
 import { SearchedMovie } from "@/types";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 type SearchActionState = {
   data: SearchedMovie[] | null;
@@ -41,3 +46,47 @@ export async function searchMovies(
     return { data: null, error: err as Error };
   }
 }
+
+export const addMovie = async (movie: {
+  id: string;
+  title: string;
+  poster?: string;
+}) => {
+  const session = await auth();
+
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const promise = db
+    .insert(movies)
+    .values({
+      userId: session.user.id,
+      movieId: movie.id,
+      title: movie.title,
+      poster: movie.poster ?? null,
+    })
+    .onConflictDoNothing();
+
+  const result = await tryCatch(promise);
+
+  if (result.error) return false;
+
+  console.log("revalidating");
+
+  return true;
+};
+
+export const getUserMovies = async () => {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const promise = db
+    .select()
+    .from(movies)
+    .where(eq(movies.userId, session.user.id));
+
+  const result = await tryCatch(promise);
+
+  if (result.error) return [];
+
+  return result.data;
+};
