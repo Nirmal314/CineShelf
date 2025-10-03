@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { AspectRatio } from "./ui/aspect-ratio"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 
 type MovieCardProps = {
     movie: {
@@ -26,6 +27,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
 
     const pointerStart = useRef<{ x: number, y: number } | null>(null)
     const draggingRef = useRef(false)
+    const [loading, setLoading] = useState(true)
 
     const handlePointerDown = (e: React.PointerEvent) => {
         // mark initial coordinates
@@ -71,17 +73,46 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
             >
                 <div className="relative">
                     <AspectRatio ratio={2 / 3} className="bg-charcoal/20">
-                        <Image
-                            src={movie.poster || "/placeholder.svg"}
-                            alt={`${movie.title} poster`}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            style={{ objectFit: "cover" }}
-                            priority={false}
-                            loading="lazy"
-                            placeholder="blur"
-                            blurDataURL={movie.poster || "/placeholder.svg"}
-                        />
+                        <AnimatePresence>
+                            {loading && (
+                                <motion.div
+                                    key="skeleton"
+                                    initial={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                                    className="absolute inset-0 rounded-xl overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-primary/30" />
+
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent"
+                                        initial={{ x: "-100%" }}
+                                        animate={{ x: "100%" }}
+                                        transition={{
+                                            repeat: Infinity,
+                                            duration: 1.2,
+                                            ease: "linear",
+                                        }}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: loading ? 0.95 : 1, opacity: loading ? 0 : 1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                            className="w-full h-full"
+                        >
+                            <Image
+                                src={movie.poster || "/placeholder.svg"}
+                                alt={`${movie.title} poster`}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                style={{ objectFit: "cover" }}
+                                onLoad={() => setLoading(false)}
+                                priority={false}
+                            />
+                        </motion.div>
                     </AspectRatio>
 
                     <div className="absolute inset-0 z-20"></div>

@@ -70,7 +70,7 @@ export const addMovie = async (movie: {
 
   if (result.error) return false;
 
-  console.log("revalidating");
+  revalidatePath("/");
 
   return true;
 };
