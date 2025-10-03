@@ -43,15 +43,22 @@ export const accounts = pgTable(
   ]
 );
 
-export const movies = pgTable(
-  "movie",
+export const movies = pgTable("movie", {
+  id: text("id").notNull().primaryKey(),
+  title: text("title").notNull(),
+  poster: text("poster"),
+});
+
+export const userMovies = pgTable(
+  "userMovies",
   {
     userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    movieId: text("movieId").notNull(),
-    title: text("title").notNull(),
-    poster: text("poster"),
+    movieId: text("movieId")
+      .notNull()
+      .references(() => movies.id, { onDelete: "cascade" }),
+    rank: integer("rank").notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.movieId] })]
 );

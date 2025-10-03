@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1757486704584,
-      "tag": "0000_omniscient_sentinels",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1757489045967,
-      "tag": "0001_amused_bloodscream",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1759413276431,
-      "tag": "0002_wooden_black_panther",
+      "when": 1759493762860,
+      "tag": "0000_absent_smasher",
       "breakpoints": true
     }
   ]

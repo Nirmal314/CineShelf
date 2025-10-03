@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { movies } from "@/db/schema";
+import { movies, userMovies } from "@/db/schema";
 import { tryCatch } from "@/lib/try-catch";
 import { SearchedMovie } from "@/types";
 import { and, asc, eq, or } from "drizzle-orm";
@@ -51,20 +51,32 @@ export const addMovie = async (movie: {
   id: string;
   title: string;
   poster?: string;
+  rank?: number;
 }) => {
   const session = await auth();
-
   if (!session?.user?.id) throw new Error("Not authenticated");
 
-  const promise = db
-    .insert(movies)
-    .values({
-      userId: session.user.id,
-      movieId: movie.id,
-      title: movie.title,
-      poster: movie.poster ?? null,
-    })
-    .onConflictDoNothing();
+  const promise = db.transaction(async (tx) => {
+    // movies table
+    await tx
+      .insert(movies)
+      .values({
+        id: movie.id,
+        title: movie.title,
+        poster: movie.poster ?? null,
+      })
+      .onConflictDoNothing();
+
+    // users - movies junction table
+    await tx
+      .insert(userMovies)
+      .values({
+        userId: session.user.id,
+        movieId: movie.id,
+        rank: movie.rank ?? -1,
+      })
+      .onConflictDoNothing();
+  });
 
   const result = await tryCatch(promise);
 
@@ -80,10 +92,16 @@ export const getUserMovies = async () => {
   if (!session?.user?.id) return [];
 
   const promise = db
-    .select()
-    .from(movies)
-    .where(eq(movies.userId, session.user.id))
-    .orderBy(asc(movies.title)); // TODO: Order by user ranking
+    .select({
+      id: movies.id,
+      title: movies.title,
+      poster: movies.poster,
+      rank: userMovies.rank,
+    })
+    .from(userMovies)
+    .innerJoin(movies, eq(movies.id, userMovies.movieId))
+    .where(eq(userMovies.userId, session.user.id))
+    .orderBy(asc(userMovies.rank));
 
   const result = await tryCatch(promise);
 
@@ -97,13 +115,36 @@ export const deleteMovies = async (movieIds: string[]) => {
   if (!session?.user?.id) throw new Error("Not authenticated");
   if (movieIds.length === 0) return false;
 
-  const conditions = movieIds.map((id) => eq(movies.movieId, id));
+  const conditions = movieIds.map((id) => eq(userMovies.movieId, id));
 
   const promise = db
-    .delete(movies)
-    .where(and(or(...conditions), eq(movies.userId, session.user.id)));
+    .delete(userMovies)
+    .where(and(or(...conditions), eq(userMovies.userId, session.user.id)));
 
   const result = await tryCatch(promise);
+
+  if (result.error) return false;
+
+  revalidatePath("/");
+
+  return true;
+};
+
+export const updateMovieRank = async (movieId: string, rank: number) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+
+  const result = await tryCatch(
+    db
+      .update(userMovies)
+      .set({ rank })
+      .where(
+        and(
+          eq(userMovies.userId, session.user.id),
+          eq(userMovies.movieId, movieId)
+        )
+      )
+  );
 
   if (result.error) return false;
 
