@@ -7,10 +7,10 @@ import { deleteMovies } from '@/actions/movies'
 import { Button } from '../ui/cool-button'
 
 type Movie = {
-    userId?: string;
-    movieId: string;
+    id: string;
     title: string;
     poster: string | null;
+    rank: number;
 }
 
 const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
@@ -92,20 +92,20 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
             >
                 {movies.map((movie) => (
                     <div
-                        key={movie.movieId}
-                        data-swapy-slot={movie.movieId}
+                        key={movie.id}
+                        data-swapy-slot={movie.id}
                         className="flex h-full"
                     >
                         <div
-                            data-swapy-item={movie.movieId}
+                            data-swapy-item={movie.id}
                             className="cursor-grab active:cursor-grabbing w-full"
                         >
                             <MovieCard
                                 movie={movie}
                                 className='min-w-56'
                                 deleteMode={deleteMode}
-                                selected={selectedMovies.includes(movie.movieId)}
-                                onSelect={() => toggleMovieSelection(movie.movieId)}
+                                selected={selectedMovies.includes(movie.id)}
+                                onSelect={() => toggleMovieSelection(movie.id)}
                             />
                         </div>
                     </div>

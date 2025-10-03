@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { movies, userMovies } from "@/db/schema";
 import { tryCatch } from "@/lib/try-catch";
 import { SearchedMovie } from "@/types";
-import { and, asc, eq, or } from "drizzle-orm";
+import { and, asc, eq, max, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 type SearchActionState = {
@@ -67,13 +67,19 @@ export const addMovie = async (movie: {
       })
       .onConflictDoNothing();
 
+    const [{ value: maxRank }] = await db
+      .select({ value: max(userMovies.rank) })
+      .from(userMovies);
+
+    const nextRank = (maxRank ?? 0) + 1;
+
     // users - movies junction table
     await tx
       .insert(userMovies)
       .values({
         userId: session.user.id,
         movieId: movie.id,
-        rank: movie.rank ?? -1,
+        rank: nextRank,
       })
       .onConflictDoNothing();
   });

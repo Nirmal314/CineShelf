@@ -11,8 +11,7 @@ import { Check } from "lucide-react"
 
 type MovieCardProps = {
     movie: {
-        userId?: string;
-        movieId: string;
+        id: string;
         title: string;
         poster: string | null;
     }
@@ -50,7 +49,7 @@ const MovieCard = ({ movie, className, deleteMode = false, selected = false, onS
             onSelect()
             return
         }
-        router.push(`/movie/${movie.movieId}`)
+        router.push(`/movie/${movie.id}`)
     }
 
     return (
