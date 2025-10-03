@@ -41,14 +41,14 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
         setSelectedMovies(Array.from(newSet))
     }
 
-    const handleDelete = async () => {
-        const success = await deleteMovies(selectedMovies)
+    // const handleDelete = async () => {
+    //     const success = await deleteMovies(selectedMovies)
 
-        if (success) {
-            setSelectedMovies([])
-            setDeleteMode(false)
-        }
-    }
+    //     if (success) {
+    //         setSelectedMovies([])
+    //         setDeleteMode(false)
+    //     }
+    // }
 
     const handleCancel = () => {
         setSelectedMovies([])
@@ -57,7 +57,7 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
 
     return (
         <div>
-            <div className="flex gap-2 mb-4">
+            {/* <div className="flex gap-2 mb-4">
                 {!deleteMode && (
                     <Button
                         onClick={() => setDeleteMode(true)}
@@ -83,7 +83,7 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                         </Button>
                     </>
                 )}
-            </div>
+            </div> */}
             <div
                 ref={container}
                 className="grid 
