@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { movies } from "@/db/schema";
 import { tryCatch } from "@/lib/try-catch";
 import { SearchedMovie } from "@/types";
-import { eq } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 type SearchActionState = {
@@ -82,11 +82,32 @@ export const getUserMovies = async () => {
   const promise = db
     .select()
     .from(movies)
-    .where(eq(movies.userId, session.user.id));
+    .where(eq(movies.userId, session.user.id))
+    .orderBy(asc(movies.title)); // TODO: Order by user ranking
 
   const result = await tryCatch(promise);
 
   if (result.error) return [];
 
   return result.data;
+};
+
+export const deleteMovies = async (movieIds: string[]) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+  if (movieIds.length === 0) return false;
+
+  const conditions = movieIds.map((id) => eq(movies.movieId, id));
+
+  const promise = db
+    .delete(movies)
+    .where(and(or(...conditions), eq(movies.userId, session.user.id)));
+
+  const result = await tryCatch(promise);
+
+  if (result.error) return false;
+
+  revalidatePath("/");
+
+  return true;
 };

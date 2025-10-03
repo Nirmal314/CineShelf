@@ -1,8 +1,10 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createSwapy, Swapy } from 'swapy'
 import MovieCard from '../movie-card'
+import { deleteMovies } from '@/actions/movies'
+import { Button } from '../ui/cool-button'
 
 type Movie = {
     userId?: string;
@@ -11,50 +13,105 @@ type Movie = {
     poster: string | null;
 }
 
-const UserMovies = ({ initialMovies }: {
-    initialMovies: Movie[]
-}) => {
+const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
     const swapy = useRef<Swapy | null>(null)
     const container = useRef<HTMLDivElement | null>(null)
-
-    const cards = initialMovies
+    const movies = initialMovies
+    const [deleteMode, setDeleteMode] = useState(false)
+    const [selectedMovies, setSelectedMovies] = useState<string[]>([])
 
     useEffect(() => {
         if (container.current) {
             swapy.current = createSwapy(container.current, {
                 animation: "spring",
-                autoScrollOnDrag: true
+                autoScrollOnDrag: true,
+                enabled: !deleteMode,
             })
-            // swapy.current.onSwap((event) => {})
-            // swapy.current.onSwapStart((event) => {})
-            // swapy.current.onSwapEnd((event) => {})
         }
         return () => swapy.current?.destroy()
-    }, [cards])
+    }, [movies, deleteMode])
+
+    const toggleMovieSelection = (movieId: string) => {
+        if (!deleteMode) return
+
+        const newSet = new Set(selectedMovies)
+        if (newSet.has(movieId)) newSet.delete(movieId)
+        else newSet.add(movieId)
+
+        setSelectedMovies(Array.from(newSet))
+    }
+
+    const handleDelete = async () => {
+        const success = await deleteMovies(selectedMovies)
+
+        if (success) {
+            setSelectedMovies([])
+            setDeleteMode(false)
+        }
+    }
+
+    const handleCancel = () => {
+        setSelectedMovies([])
+        setDeleteMode(false)
+    }
 
     return (
-        <div
-            ref={container}
-            className="grid 
-            grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 
-            gap-6 items-stretch"
-        >
-            {cards.map((movie) => (
-                <div
-                    key={movie.movieId}
-                    data-swapy-slot={movie.movieId}
-                    className="flex h-full"
-                >
-                    <div
-                        data-swapy-item={movie.movieId}
-                        className="cursor-grab active:cursor-grabbing w-full"
+        <div>
+            <div className="flex gap-2 mb-4">
+                {!deleteMode && (
+                    <Button
+                        onClick={() => setDeleteMode(true)}
+                        variant="red"
                     >
-                        <MovieCard movie={movie} className='min-w-56' />
+                        Delete Movies
+                    </Button>
+                )}
+                {deleteMode && (
+                    <>
+                        <Button
+                            variant="red"
+                            onClick={handleDelete}
+                            disabled={selectedMovies.length === 0}
+                        >
+                            Delete Selected ({selectedMovies.length})
+                        </Button>
+                        <Button
+                            variant="warm"
+                            onClick={handleCancel}
+                        >
+                            Cancel
+                        </Button>
+                    </>
+                )}
+            </div>
+            <div
+                ref={container}
+                className="grid 
+                grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 
+                gap-6 items-stretch"
+            >
+                {movies.map((movie) => (
+                    <div
+                        key={movie.movieId}
+                        data-swapy-slot={movie.movieId}
+                        className="flex h-full"
+                    >
+                        <div
+                            data-swapy-item={movie.movieId}
+                            className="cursor-grab active:cursor-grabbing w-full"
+                        >
+                            <MovieCard
+                                movie={movie}
+                                className='min-w-56'
+                                deleteMode={deleteMode}
+                                selected={selectedMovies.includes(movie.movieId)}
+                                onSelect={() => toggleMovieSelection(movie.movieId)}
+                            />
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
-
     )
 }
 

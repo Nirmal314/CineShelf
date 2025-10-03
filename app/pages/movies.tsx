@@ -6,7 +6,7 @@ import React from 'react'
 
 const Movies = async ({ session }: { session: Session }) => {
     return (
-        <div className="mt-20 md:mt-10 relative z-10 flex min-h-screen items-start justify-center px-4 sm:px-6 md:px-8">
+        <div className="pt-20 md:pt-10 relative z-10 flex min-h-screen items-start justify-center px-4 sm:px-6 md:px-8">
             <div>
                 <SearchMovies />
                 <MoviesGrid />
