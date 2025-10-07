@@ -1,38 +1,34 @@
 import {
-  timestamp,
   pgTable,
   text,
+  timestamp,
   primaryKey,
-  integer,
+  index,
 } from "drizzle-orm/pg-core";
 import { AdapterAccountType } from "next-auth/adapters";
 
-export const users = pgTable("user", {
+export const users = pgTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").unique(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  email: text("email").unique().notNull(),
   image: text("image"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const accounts = pgTable(
-  "account",
+  "accounts",
   {
-    userId: text("userId")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
     provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
+    providerAccountId: text("provider_account_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (account) => [
     {
@@ -43,22 +39,42 @@ export const accounts = pgTable(
   ]
 );
 
-export const movies = pgTable("movie", {
-  id: text("id").notNull().primaryKey(),
+export const movies = pgTable("movies", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
   poster: text("poster"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const userMovies = pgTable(
-  "userMovies",
+  "user_movies",
   {
-    userId: text("userId")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    movieId: text("movieId")
+
+    movieId: text("movie_id")
       .notNull()
       .references(() => movies.id, { onDelete: "cascade" }),
-    rank: integer("rank").notNull(),
+
+    // Doubly linked list pointers
+    prevMovieId: text("prev_movie_id").references(() => movies.id, {
+      onDelete: "set null",
+    }),
+    nextMovieId: text("next_movie_id").references(() => movies.id, {
+      onDelete: "set null",
+    }),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.movieId] })]
+  (t) => [
+    primaryKey({ columns: [t.userId, t.movieId] }),
+    index("idx_user_movies_user").on(t.userId),
+    index("idx_user_movies_prev").on(t.userId, t.prevMovieId),
+    index("idx_user_movies_next").on(t.userId, t.nextMovieId),
+  ]
 );
