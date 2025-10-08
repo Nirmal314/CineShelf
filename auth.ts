@@ -14,27 +14,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      const existing = await db
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          image: users.image,
-        })
+    async signIn({ user }) {
+      const [existingUser] = await db
+        .select()
         .from(users)
         .where(eq(users.email, user.email!))
         .limit(1);
 
-      if (existing.length === 0) {
-        await db.insert(users).values({
-          name: user.name ?? "",
-          email: user.email!,
-          image: user.image ?? "",
-        });
-      } else {
-        const existingUser = existing[0];
+      let userId: string;
 
+      if (!existingUser) {
+        const inserted = await db
+          .insert(users)
+          .values({
+            name: user.name ?? "",
+            email: user.email!,
+            image: user.image ?? "",
+          })
+          .returning({ id: users.id });
+
+        userId = inserted[0].id;
+      } else {
+        userId = existingUser.id;
         await db
           .update(users)
           .set({
@@ -44,9 +45,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           })
           .where(eq(users.email, user.email!));
       }
-      return true; // Allow sign-in
+
+      user.id = userId;
+
+      return true;
     },
-    async jwt({ token, user, account, profile, session }) {
+
+    async jwt({ token, user, account, profile }) {
+      if (user?.id) {
+        token.id = user.id;
+      }
+
       if (account && profile) {
         token.provider = account.provider?.toUpperCase() as
           | "SPOTIFY"
@@ -62,12 +71,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             break;
         }
       }
+
       return token;
     },
-    async session({ session, token, user, newSession }) {
-      if (token.sub) {
-        session.user.id = token.sub;
-      }
+
+    async session({ session, token }) {
+      if (token.id) session.user.id = token.id;
 
       if (token.provider) {
         session.user.provider = token.provider;
@@ -87,5 +96,3 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
-
-// token => session
