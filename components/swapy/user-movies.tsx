@@ -10,7 +10,6 @@ type Movie = {
     id: string;
     title: string;
     poster: string | null;
-    rank: number;
 }
 
 const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {

@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -39,12 +40,8 @@ export const userMovies = pgTable(
       .references(() => movies.id, { onDelete: "cascade" }),
 
     // Doubly linked list pointers
-    prevMovieId: text("prev_movie_id").references(() => movies.id, {
-      onDelete: "set null",
-    }),
-    nextMovieId: text("next_movie_id").references(() => movies.id, {
-      onDelete: "set null",
-    }),
+    prevMovieId: text("prev_movie_id"),
+    nextMovieId: text("next_movie_id"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -56,3 +53,22 @@ export const userMovies = pgTable(
     index("idx_user_movies_next").on(t.userId, t.nextMovieId),
   ]
 );
+
+export const moviesRelations = relations(movies, ({ many }) => ({
+  moviesToUsers: many(userMovies),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  moviesToUsers: many(userMovies),
+}));
+
+export const usersToMoviesRelations = relations(userMovies, ({ one }) => ({
+  movie: one(movies, {
+    fields: [userMovies.movieId],
+    references: [movies.id],
+  }),
+  user: one(users, {
+    fields: [userMovies.userId],
+    references: [users.id],
+  }),
+}));
