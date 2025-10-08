@@ -3,8 +3,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createSwapy, Swapy } from 'swapy'
 import MovieCard from '../movie-card'
-import { deleteMovies } from '@/actions/movies'
-import { Button } from '../ui/cool-button'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../ui/context-menu'
+import { Clapperboard, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { removeMovie } from '@/actions/movies'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
 
 type Movie = {
     id: string;
@@ -16,73 +19,40 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
     const swapy = useRef<Swapy | null>(null)
     const container = useRef<HTMLDivElement | null>(null)
     const movies = initialMovies
-    const [deleteMode, setDeleteMode] = useState(false)
-    const [selectedMovies, setSelectedMovies] = useState<string[]>([])
+    const [open, setOpen] = useState(false)
+    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
     useEffect(() => {
         if (container.current) {
             swapy.current = createSwapy(container.current, {
                 animation: "spring",
                 autoScrollOnDrag: true,
-                enabled: !deleteMode,
             })
         }
         return () => swapy.current?.destroy()
-    }, [movies, deleteMode])
+    }, [movies])
 
-    const toggleMovieSelection = (movieId: string) => {
-        if (!deleteMode) return
-
-        const newSet = new Set(selectedMovies)
-        if (newSet.has(movieId)) newSet.delete(movieId)
-        else newSet.add(movieId)
-
-        setSelectedMovies(Array.from(newSet))
+    const confirm = (movie: Movie) => {
+        setSelectedMovie(movie)
+        setOpen(true)
     }
 
-    // const handleDelete = async () => {
-    //     const success = await deleteMovies(selectedMovies)
+    const handleRemove = async () => {
+        if (!selectedMovie) return
 
-    //     if (success) {
-    //         setSelectedMovies([])
-    //         setDeleteMode(false)
-    //     }
-    // }
-
-    const handleCancel = () => {
-        setSelectedMovies([])
-        setDeleteMode(false)
+        try {
+            await removeMovie(selectedMovie.id)
+        } catch (error) {
+            console.error("Failed to delete movie:", error)
+            alert("Failed to delete movie. Please try again.")
+        } finally {
+            setOpen(false)
+            setSelectedMovie(null)
+        }
     }
 
     return (
         <div>
-            {/* <div className="flex gap-2 mb-4">
-                {!deleteMode && (
-                    <Button
-                        onClick={() => setDeleteMode(true)}
-                        variant="red"
-                    >
-                        Delete Movies
-                    </Button>
-                )}
-                {deleteMode && (
-                    <>
-                        <Button
-                            variant="red"
-                            onClick={handleDelete}
-                            disabled={selectedMovies.length === 0}
-                        >
-                            Delete Selected ({selectedMovies.length})
-                        </Button>
-                        <Button
-                            variant="warm"
-                            onClick={handleCancel}
-                        >
-                            Cancel
-                        </Button>
-                    </>
-                )}
-            </div> */}
             <div
                 ref={container}
                 className="grid 
@@ -99,17 +69,47 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                             data-swapy-item={movie.id}
                             className="cursor-grab active:cursor-grabbing w-full"
                         >
-                            <MovieCard
-                                movie={movie}
-                                className='min-w-56'
-                                deleteMode={deleteMode}
-                                selected={selectedMovies.includes(movie.id)}
-                                onSelect={() => toggleMovieSelection(movie.id)}
-                            />
+                            <ContextMenu>
+                                <ContextMenuTrigger>
+                                    <MovieCard
+                                        movie={movie}
+                                        className='min-w-56'
+                                    />
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    <ContextMenuItem variant='destructive'>
+                                        <Trash2 className='mr-1' />
+                                        <button onClick={() => confirm(movie)}>Remove</button>
+                                    </ContextMenuItem>
+                                    <ContextMenuItem>
+                                        <Clapperboard className='mr-1' />
+                                        <Link href={`https://www.imdb.com/title/${movie.id}`} target='_blank'>IMDb</Link>
+                                    </ContextMenuItem>
+                                </ContextMenuContent>
+                            </ContextMenu>
                         </div>
                     </div>
                 ))}
             </div>
+
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogContent className='bg-secondary'>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className='mb-6 text-2xl'>One less movie on the shelf?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You’re about to remove <span className='font-bold'>{selectedMovie?.title}</span> from your shelf. <br />
+                            It’ll be gone for now, but you can always bring it back later!
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleRemove}>
+                            Yes, Remove
+                        </AlertDialogAction>
+                        <AlertDialogCancel className='!bg-primary/10 hover:!bg-primary/15 transition-colors duration-200 border !border-primary'>Cancel</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
         </div>
     )
 }

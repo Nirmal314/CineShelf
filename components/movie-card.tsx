@@ -16,12 +16,9 @@ type MovieCardProps = {
         poster: string | null;
     }
     className?: string
-    deleteMode?: boolean
-    selected?: boolean
-    onSelect?: () => void
 }
 
-const MovieCard = ({ movie, className, deleteMode = false, selected = false, onSelect }: MovieCardProps) => {
+const MovieCard = ({ movie, className }: MovieCardProps) => {
     const router = useRouter()
     const pointerStart = useRef<{ x: number, y: number } | null>(null)
     const draggingRef = useRef(false)
@@ -45,10 +42,7 @@ const MovieCard = ({ movie, className, deleteMode = false, selected = false, onS
             e.preventDefault()
             return
         }
-        if (deleteMode && onSelect) {
-            onSelect()
-            return
-        }
+
         router.push(`/movie/${movie.id}`)
     }
 
@@ -108,22 +102,7 @@ const MovieCard = ({ movie, className, deleteMode = false, selected = false, onS
                         </motion.div>
                     </AspectRatio>
 
-                    {!deleteMode && !selected && <div className="absolute inset-0 z-20" />}
-
-                    <AnimatePresence>
-                        {deleteMode && selected && (
-                            <motion.div
-                                key="overlay"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                className="absolute inset-0 bg-primary/60 flex items-center justify-center z-20 rounded-xl"
-                            >
-                                <Check className="w-12 h-12 text-white" />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <div className="absolute inset-0 z-20" />
                 </div>
             </Card>
         </div>

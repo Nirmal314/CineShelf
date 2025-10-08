@@ -139,22 +139,51 @@ export const getUserMovies = async () => {
   return ordered;
 };
 
-export const deleteMovies = async (movieIds: string[]) => {
+export const removeMovie = async (movieId: string) => {
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
-  if (movieIds.length === 0) return false;
+  if (!session?.user?.id) return [];
 
-  const conditions = movieIds.map((id) => eq(userMovies.movieId, id));
+  const userId = session.user.id;
 
-  const promise = db
-    .delete(userMovies)
-    .where(and(or(...conditions), eq(userMovies.userId, session.user.id)));
+  await db.transaction(async (tx) => {
+    const movieToDelete = await tx.query.userMovies.findFirst({
+      where: and(
+        eq(userMovies.userId, userId),
+        eq(userMovies.movieId, movieId)
+      ),
+    });
 
-  const result = await tryCatch(promise);
+    if (!movieToDelete) return;
 
-  if (result.error) return false;
+    if (movieToDelete.prevMovieId) {
+      await tx
+        .update(userMovies)
+        .set({ nextMovieId: movieToDelete.nextMovieId })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, movieToDelete.prevMovieId)
+          )
+        );
+    }
+    if (movieToDelete.nextMovieId) {
+      await tx
+        .update(userMovies)
+        .set({ prevMovieId: movieToDelete.prevMovieId })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, movieToDelete.nextMovieId)
+          )
+        );
+    }
+
+    await tx
+      .delete(userMovies)
+      .where(
+        and(eq(userMovies.userId, userId), eq(userMovies.movieId, movieId))
+      );
+  });
 
   revalidatePath("/");
-
-  return true;
 };
