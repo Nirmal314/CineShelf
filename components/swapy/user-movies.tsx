@@ -6,8 +6,9 @@ import MovieCard from '../movie-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../ui/context-menu'
 import { Clapperboard, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import { removeMovie } from '@/actions/movies'
+import { removeMovie, swapMovies } from '@/actions/movies'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
+import { tryCatch } from '@/lib/try-catch'
 
 type Movie = {
     id: string;
@@ -27,6 +28,14 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
             swapy.current = createSwapy(container.current, {
                 animation: "spring",
                 autoScrollOnDrag: true,
+                swapMode: "drop"
+            })
+
+            swapy.current.onSwap(async (e) => {
+                const draggingItem = e.draggingItem;
+                const swappedWithItem = e.swappedWithItem;
+
+                await swapMovies(draggingItem, swappedWithItem);
             })
         }
         return () => swapy.current?.destroy()
@@ -40,15 +49,15 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
     const handleRemove = async () => {
         if (!selectedMovie) return
 
-        try {
-            await removeMovie(selectedMovie.id)
-        } catch (error) {
-            console.error("Failed to delete movie:", error)
+        const res = await tryCatch(removeMovie(selectedMovie.id))
+
+        if (res.error) {
+            console.error("Failed to delete movie:", res.error)
             alert("Failed to delete movie. Please try again.")
-        } finally {
-            setOpen(false)
-            setSelectedMovie(null)
         }
+
+        setOpen(false)
+        setSelectedMovie(null)
     }
 
     return (
@@ -59,10 +68,10 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 
                 gap-6 items-stretch"
             >
-                {movies.map((movie) => (
+                {movies.map((movie, i) => (
                     <div
                         key={movie.id}
-                        data-swapy-slot={movie.id}
+                        data-swapy-slot={`slot-${i}`}
                         className="flex h-full"
                     >
                         <div
@@ -77,9 +86,9 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                                     />
                                 </ContextMenuTrigger>
                                 <ContextMenuContent>
-                                    <ContextMenuItem variant='destructive'>
+                                    <ContextMenuItem variant='destructive' onClick={() => confirm(movie)}>
                                         <Trash2 className='mr-1' />
-                                        <button onClick={() => confirm(movie)}>Remove</button>
+                                        Remove
                                     </ContextMenuItem>
                                     <ContextMenuItem>
                                         <Clapperboard className='mr-1' />
@@ -101,7 +110,7 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                             It’ll be gone for now, but you can always bring it back later!
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
+                    <AlertDialogFooter className='flex-col'>
                         <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleRemove}>
                             Yes, Remove
                         </AlertDialogAction>
