@@ -113,7 +113,7 @@ export const addMovie = async (movie: {
 
 export const getUserMovies = async () => {
   const session = await auth();
-  if (!session?.user?.id) return [];
+  if (!session?.user?.id) throw new Error("Not authenticated");
 
   const userId = session.user.id;
 
@@ -122,7 +122,7 @@ export const getUserMovies = async () => {
     with: { movie: true },
   });
 
-  if (movies.length <= 0) return [];
+  if (!movies || movies.length <= 0) return [];
 
   const map = new Map(movies.map((m) => [m.movieId, m]));
   let head = movies.find((m) => !m.prevMovieId) ?? null;

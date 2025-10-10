@@ -46,3 +46,9 @@ export type SearchedMovie = {
     voteCount?: number;
   };
 };
+
+export type UserMovie = {
+  id: string;
+  title: string;
+  poster: string | null;
+};

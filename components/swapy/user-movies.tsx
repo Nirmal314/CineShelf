@@ -9,18 +9,13 @@ import Link from 'next/link'
 import { removeMovie, swapMovies } from '@/actions/movies'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
 import { tryCatch } from '@/lib/try-catch'
+import { UserMovie } from '@/types'
 
-type Movie = {
-    id: string;
-    title: string;
-    poster: string | null;
-}
-
-const UserMovies = ({ movies }: { movies: Movie[] }) => {
+const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
     const swapy = useRef<Swapy | null>(null)
     const container = useRef<HTMLDivElement | null>(null)
     const [open, setOpen] = useState(false)
-    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
+    const [selectedMovie, setSelectedMovie] = useState<UserMovie | null>(null)
     const [swapping, setSwapping] = useState(false)
 
     useEffect(() => {
@@ -47,7 +42,7 @@ const UserMovies = ({ movies }: { movies: Movie[] }) => {
         return () => swapy.current?.destroy()
     }, [movies])
 
-    const confirm = (movie: Movie) => {
+    const confirm = (movie: UserMovie) => {
         setSelectedMovie(movie)
         setOpen(true)
     }

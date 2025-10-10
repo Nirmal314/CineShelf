@@ -7,13 +7,10 @@ import { AspectRatio } from "./ui/aspect-ratio"
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { UserMovie } from "@/types"
 
 type MovieCardProps = {
-    movie: {
-        id: string;
-        title: string;
-        poster: string | null;
-    }
+    movie: UserMovie
     className?: string,
     disabled: boolean
 }

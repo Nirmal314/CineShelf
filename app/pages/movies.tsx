@@ -2,14 +2,18 @@ import { ProfileButton } from '@/components/profile-button'
 import SearchMovies from '@/components/search-movies'
 import MoviesGrid from '@/components/movies-grid'
 import { Session } from 'next-auth'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const Movies = async ({ session }: { session: Session }) => {
     return (
         <div className="pt-20 md:pt-10 relative z-10 flex min-h-screen items-start justify-center px-4 sm:px-6 md:px-8">
             <div>
-                <SearchMovies />
-                <MoviesGrid />
+                <Suspense fallback={<div className='text-primary text-3xl animate-pulse duration-300'>Searching movies...</div>}>
+                    <SearchMovies />
+                </Suspense>
+                <Suspense fallback={<div className='text-primary text-3xl animate-pulse duration-300'>Loading movies...</div>}>
+                    <MoviesGrid />
+                </Suspense>
             </div>
 
             <ProfileButton
