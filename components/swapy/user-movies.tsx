@@ -10,6 +10,7 @@ import { removeMovie, swapMovies } from '@/actions/movies'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
 import { tryCatch } from '@/lib/try-catch'
 import { UserMovie } from '@/types'
+import { toast } from 'sonner'
 
 const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
     const swapy = useRef<Swapy | null>(null)
@@ -17,30 +18,40 @@ const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
     const [open, setOpen] = useState(false)
     const [selectedMovie, setSelectedMovie] = useState<UserMovie | null>(null)
     const [swapping, setSwapping] = useState(false)
+    const [resetKey, setResetKey] = useState(0)
 
     useEffect(() => {
-        if (container.current) {
-            swapy.current = createSwapy(container.current, {
-                animation: "spring",
-                autoScrollOnDrag: true,
-                swapMode: "drop"
-            })
+        if (!container.current) return
 
-            swapy.current.onSwap(async (e) => {
-                setSwapping(true)
-                const res = await tryCatch(swapMovies(e.draggingItem, e.swappedWithItem))
-
-                if (res.error) {
-                    // TODO: Re-swap movies, fallback
-
-                    console.error(res.error)
-                }
-
-                setSwapping(false)
-            })
+        if (swapy.current) {
+            swapy.current.destroy()
+            swapy.current = null
         }
-        return () => swapy.current?.destroy()
-    }, [movies])
+
+        const instance = createSwapy(container.current, {
+            animation: "spring",
+            autoScrollOnDrag: true,
+            swapMode: "drop",
+        })
+
+        instance.onSwap(async (e) => {
+            setSwapping(true)
+            const res = await tryCatch(swapMovies(e.draggingItem, e.swappedWithItem))
+
+            if (res.error) {
+                console.error("Swap failed:", res.error)
+                toast.error(res.error.message || "Swap failed!")
+
+                setResetKey((prev) => prev + 1)
+            }
+
+            setSwapping(false)
+        })
+
+        swapy.current = instance
+
+        return () => instance.destroy()
+    }, [movies, resetKey])
 
     const confirm = (movie: UserMovie) => {
         setSelectedMovie(movie)
@@ -54,7 +65,7 @@ const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
 
         if (res.error) {
             console.error("Failed to delete movie:", res.error)
-            alert("Failed to delete movie. Please try again.")
+            toast.error(res.error.message || "Failed to delete movie. Please try again.")
         }
 
         setOpen(false)
@@ -64,6 +75,7 @@ const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
     return (
         <div>
             <div
+                key={resetKey}
                 ref={container}
                 className="grid 
                 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 
@@ -78,7 +90,7 @@ const UserMovies = ({ movies }: { movies: UserMovie[] }) => {
                         <div
                             data-swapy-item={movie.id}
                             className="cursor-grab active:cursor-grabbing w-full"
-                            style={swapping ? { pointerEvents: 'none' } : {}}
+                            style={{ pointerEvents: swapping ? 'none' : 'auto' }}
                         >
                             <ContextMenu>
                                 <ContextMenuTrigger>

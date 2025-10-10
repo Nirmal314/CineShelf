@@ -328,10 +328,7 @@ export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
 
   const result = await tryCatch(txPromise);
 
-  if (result.error)
-    throw new Error(result.error.message || "Unsuccessful swap!");
+  if (result.error) throw result.error;
 
   return true;
-
-  // revalidatePath("/");
 };

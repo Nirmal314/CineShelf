@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Gabriela } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-// import ClickSpark from "@/components/click-spark";
+import { Toaster } from "@/components/ui/sonner";
 
 const font = Gabriela({
   weight: "400",
@@ -26,9 +26,12 @@ export default function RootLayout({
         <body
           className={`${font.variable} antialiased bg-paper text-charcoal`}
         >
-          {/* <ClickSpark sparkColor='#99582a' duration={350}> */}
           {children}
-          {/* </ClickSpark> */}
+
+          <Toaster
+            expand
+            position="bottom-right"
+          />
         </body>
       </html>
     </SessionProvider>
