@@ -5,6 +5,8 @@ import { db } from "./db";
 import { users } from "./db/schema";
 import { eq } from "drizzle-orm";
 
+const allowedUsers = ["nambasana033@gmail.com"];
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
@@ -15,6 +17,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
+      if (!allowedUsers.includes(user.email!)) return false;
+
       const [existingUser] = await db
         .select()
         .from(users)
