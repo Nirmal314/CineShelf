@@ -16,12 +16,12 @@ type Movie = {
     poster: string | null;
 }
 
-const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
+const UserMovies = ({ movies }: { movies: Movie[] }) => {
     const swapy = useRef<Swapy | null>(null)
     const container = useRef<HTMLDivElement | null>(null)
-    const movies = initialMovies
     const [open, setOpen] = useState(false)
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
+    const [swapping, setSwapping] = useState(false)
 
     useEffect(() => {
         if (container.current) {
@@ -32,10 +32,16 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
             })
 
             swapy.current.onSwap(async (e) => {
-                const draggingItem = e.draggingItem;
-                const swappedWithItem = e.swappedWithItem;
+                setSwapping(true)
+                const res = await tryCatch(swapMovies(e.draggingItem, e.swappedWithItem))
 
-                await swapMovies(draggingItem, swappedWithItem);
+                if (res.error) {
+                    // TODO: Re-swap movies, fallback
+
+                    console.error(res.error)
+                }
+
+                setSwapping(false)
             })
         }
         return () => swapy.current?.destroy()
@@ -77,12 +83,14 @@ const UserMovies = ({ initialMovies }: { initialMovies: Movie[] }) => {
                         <div
                             data-swapy-item={movie.id}
                             className="cursor-grab active:cursor-grabbing w-full"
+                            style={swapping ? { pointerEvents: 'none' } : {}}
                         >
                             <ContextMenu>
                                 <ContextMenuTrigger>
                                     <MovieCard
                                         movie={movie}
                                         className='min-w-56'
+                                        disabled={swapping}
                                     />
                                 </ContextMenuTrigger>
                                 <ContextMenuContent>

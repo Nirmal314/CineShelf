@@ -7,7 +7,6 @@ import { AspectRatio } from "./ui/aspect-ratio"
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check } from "lucide-react"
 
 type MovieCardProps = {
     movie: {
@@ -15,21 +14,26 @@ type MovieCardProps = {
         title: string;
         poster: string | null;
     }
-    className?: string
+    className?: string,
+    disabled: boolean
 }
 
-const MovieCard = ({ movie, className }: MovieCardProps) => {
+const MovieCard = ({ movie, className, disabled }: MovieCardProps) => {
     const router = useRouter()
     const pointerStart = useRef<{ x: number, y: number } | null>(null)
     const draggingRef = useRef(false)
     const [loading, setLoading] = useState(true)
 
     const handlePointerDown = (e: React.PointerEvent) => {
+        if (disabled) return
+
         pointerStart.current = { x: e.clientX, y: e.clientY }
         draggingRef.current = false
     }
 
     const handlePointerMove = (e: React.PointerEvent) => {
+        if (disabled) return
+
         if (!pointerStart.current) return
         const x = e.clientX - pointerStart.current.x
         const y = e.clientY - pointerStart.current.y
@@ -38,6 +42,8 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
     }
 
     const handleClick = (e: React.MouseEvent) => {
+        if (disabled) return
+
         if (draggingRef.current) {
             e.preventDefault()
             return
@@ -47,10 +53,17 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
     }
 
     return (
-        <div
+        <motion.div
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onClick={handleClick}
+            animate={{
+                opacity: disabled ? 0.5 : 1,
+                scale: disabled ? 0.98 : 1,
+            }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="select-none"
+            style={{ pointerEvents: disabled ? "none" : "auto" }}
         >
             <Card
                 className={cn(
@@ -105,7 +118,7 @@ const MovieCard = ({ movie, className }: MovieCardProps) => {
                     <div className="absolute inset-0 z-20" />
                 </div>
             </Card>
-        </div>
+        </motion.div>
     )
 }
 

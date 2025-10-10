@@ -51,7 +51,6 @@ export const addMovie = async (movie: {
   id: string;
   title: string;
   poster?: string;
-  rank?: number;
 }) => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not authenticated");
@@ -141,7 +140,7 @@ export const getUserMovies = async () => {
 
 export const removeMovie = async (movieId: string) => {
   const session = await auth();
-  if (!session?.user?.id) return [];
+  if (!session?.user?.id) throw new Error("Not authenticated");
 
   const userId = session.user.id;
 
@@ -191,13 +190,11 @@ export const removeMovie = async (movieId: string) => {
 export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not authenticated");
+  if (oldMovieId === newMovieId) throw new Error("Can't swap same movies");
 
   const userId = session.user.id;
-  if (oldMovieId === newMovieId) {
-    return;
-  }
 
-  await db.transaction(async (tx) => {
+  const txPromise = db.transaction(async (tx) => {
     const [a, b] = await Promise.all([
       tx.query.userMovies.findFirst({
         where: and(
@@ -215,9 +212,7 @@ export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
 
     if (!a || !b) throw new Error("Movie(s) not found");
 
-    if (a.movieId === b.movieId) {
-      return;
-    }
+    if (a.movieId === b.movieId) throw new Error("Can't swap same movies");
 
     const aPrev = a.prevMovieId;
     const aNext = a.nextMovieId;
@@ -275,7 +270,7 @@ export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
           )
         );
 
-      return;
+      return true;
     }
 
     await tx
@@ -327,7 +322,16 @@ export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
           and(eq(userMovies.userId, userId), eq(userMovies.movieId, bNext))
         );
     }
+
+    return true;
   });
 
-  revalidatePath("/");
+  const result = await tryCatch(txPromise);
+
+  if (result.error)
+    throw new Error(result.error.message || "Unsuccessful swap!");
+
+  return true;
+
+  // revalidatePath("/");
 };
