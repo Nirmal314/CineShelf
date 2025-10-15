@@ -112,7 +112,7 @@ const MovieCard = ({ movie, className, disabled }: MovieCardProps) => {
                         </motion.div>
                     </AspectRatio>
 
-                    <div className="absolute inset-0 z-20" />
+                    {/* <div className="absolute inset-0 z-20" /> */}
                 </div>
             </Card>
         </motion.div>

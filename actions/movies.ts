@@ -332,3 +332,145 @@ export const swapMovies = async (oldMovieId: string, newMovieId: string) => {
 
   return true;
 };
+
+export const shiftMovies = async (movieId: string, targetMovieId: string) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Not authenticated");
+  if (movieId === targetMovieId)
+    throw new Error("Can't shift to same position");
+
+  const userId = session.user.id;
+
+  const txPromise = db.transaction(async (tx) => {
+    const [movie, target] = await Promise.all([
+      tx.query.userMovies.findFirst({
+        where: and(
+          eq(userMovies.userId, userId),
+          eq(userMovies.movieId, movieId)
+        ),
+      }),
+      tx.query.userMovies.findFirst({
+        where: and(
+          eq(userMovies.userId, userId),
+          eq(userMovies.movieId, targetMovieId)
+        ),
+      }),
+    ]);
+
+    if (!movie || !target) throw new Error("Movie(s) not found");
+
+    const mPrev = movie.prevMovieId;
+    const mNext = movie.nextMovieId;
+
+    // Detach movie
+    if (mPrev) {
+      await tx
+        .update(userMovies)
+        .set({ nextMovieId: mNext })
+        .where(
+          and(eq(userMovies.userId, userId), eq(userMovies.movieId, mPrev))
+        );
+    }
+    if (mNext) {
+      await tx
+        .update(userMovies)
+        .set({ prevMovieId: mPrev })
+        .where(
+          and(eq(userMovies.userId, userId), eq(userMovies.movieId, mNext))
+        );
+    }
+
+    // RTL or LTR
+    let ltr = false;
+    {
+      let current = movie;
+
+      while (current?.nextMovieId) {
+        const next = await tx.query.userMovies.findFirst({
+          where: and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, current.nextMovieId)
+          ),
+        });
+        if (!next) break;
+        if (next.movieId === target.movieId) {
+          ltr = true;
+          break;
+        }
+        current = next;
+      }
+    }
+
+    if (ltr) {
+      // insert AFTER target
+      const tNext = target.nextMovieId;
+
+      await tx
+        .update(userMovies)
+        .set({ prevMovieId: target.movieId, nextMovieId: tNext })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, movie.movieId)
+          )
+        );
+
+      await tx
+        .update(userMovies)
+        .set({ nextMovieId: movie.movieId })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, target.movieId)
+          )
+        );
+
+      if (tNext) {
+        await tx
+          .update(userMovies)
+          .set({ prevMovieId: movie.movieId })
+          .where(
+            and(eq(userMovies.userId, userId), eq(userMovies.movieId, tNext))
+          );
+      }
+    } else {
+      // insert BEFORE target
+      const tPrev = target.prevMovieId;
+
+      await tx
+        .update(userMovies)
+        .set({ prevMovieId: tPrev, nextMovieId: target.movieId })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, movie.movieId)
+          )
+        );
+
+      await tx
+        .update(userMovies)
+        .set({ prevMovieId: movie.movieId })
+        .where(
+          and(
+            eq(userMovies.userId, userId),
+            eq(userMovies.movieId, target.movieId)
+          )
+        );
+
+      if (tPrev) {
+        await tx
+          .update(userMovies)
+          .set({ nextMovieId: movie.movieId })
+          .where(
+            and(eq(userMovies.userId, userId), eq(userMovies.movieId, tPrev))
+          );
+      }
+    }
+
+    return true;
+  });
+
+  const result = await tryCatch(txPromise);
+  if (result.error) throw result.error;
+  return true;
+};
