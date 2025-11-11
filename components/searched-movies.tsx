@@ -2,7 +2,7 @@
 
 import type { SearchedMovie } from "@/types"
 import { useEffect, useState } from "react"
-import { X, Plus, Star } from "lucide-react"
+import { X, Plus, Star, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/cool-button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
@@ -13,6 +13,8 @@ import {
     AlertDialogDescription,
 } from "@/components/ui/alert-dialog"
 import { addMovie } from "@/actions/movies"
+import { tryCatch } from "@/lib/try-catch"
+import { toast } from "sonner"
 
 type Props = {
     movies: SearchedMovie[] | null
@@ -21,6 +23,7 @@ type Props = {
 
 const SearchedMovies = ({ movies, error }: Props) => {
     const [open, setOpen] = useState(false)
+    const [loadingMovieId, setLoadingMovieId] = useState<string | null>(null)
 
     useEffect(() => {
         if (movies !== null || error !== null) {
@@ -29,19 +32,29 @@ const SearchedMovies = ({ movies, error }: Props) => {
     }, [movies, error])
 
     const handleAddMovie = async (movie: SearchedMovie) => {
-        const resp = await addMovie({
+        setLoadingMovieId(movie.id)
+        const { error } = await tryCatch(addMovie({
             id: movie.id,
             title: movie.primaryTitle,
             poster: movie.primaryImage?.url,
-        });
+        }));
+        setLoadingMovieId(null)
 
-        if (resp) setOpen(false)
+        if (error) {
+            toast.error(error.message || "Failed to add movie.");
+            return;
+        }
+
+        toast.success(`"${movie.primaryTitle}" added to your shelf.`);
+        setOpen(false)
     }
 
     if (!open) return null
 
+    const isAdding = loadingMovieId !== null
+
     return (
-        <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialog open={open} onOpenChange={(o) => !isAdding && setOpen(o)}>
             <AlertDialogContent className="w-full sm:max-w-xl max-h-[90vh] rounded-xl bg-secondary border-none flex flex-col">
                 <AlertDialogHeader>
                     <div className="flex items-center justify-between">
@@ -49,7 +62,11 @@ const SearchedMovies = ({ movies, error }: Props) => {
                             <AlertDialogTitle>Search Results</AlertDialogTitle>
                             {movies && <AlertDialogDescription>{movies.length} movies found</AlertDialogDescription>}
                         </div>
-                        <button className="p-2 rounded-full hover:bg-accent transition-colors duration-150 cursor-pointer" onClick={() => setOpen(false)}>
+                        <button
+                            className="p-2 rounded-full hover:bg-accent transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed"
+                            onClick={() => setOpen(false)}
+                            disabled={isAdding}
+                        >
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -105,8 +122,12 @@ const SearchedMovies = ({ movies, error }: Props) => {
                                         )}
                                     </CardHeader>
                                     <CardFooter className="py-4 mt-auto">
-                                        <Button size="xs" onClick={() => handleAddMovie(m)}>
-                                            <Plus className="w-4 h-4" />
+                                        <Button size="xs" onClick={() => handleAddMovie(m)} disabled={loadingMovieId === m.id}>
+                                            {loadingMovieId === m.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Plus className="w-4 h-4" />
+                                            )}
                                             Add
                                         </Button>
                                     </CardFooter>

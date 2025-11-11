@@ -8,14 +8,16 @@ import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { UserMovie } from "@/types"
+import { Loader2 } from "lucide-react"
 
 type MovieCardProps = {
     movie: UserMovie
     className?: string,
-    disabled: boolean
+    disabled: boolean,
+    isProcessing?: boolean
 }
 
-const MovieCard = ({ movie, className, disabled }: MovieCardProps) => {
+const MovieCard = ({ movie, className, disabled, isProcessing }: MovieCardProps) => {
     const router = useRouter()
     const pointerStart = useRef<{ x: number, y: number } | null>(null)
     const draggingRef = useRef(false)
@@ -70,6 +72,19 @@ const MovieCard = ({ movie, className, disabled }: MovieCardProps) => {
                 aria-label={`${movie.title} movie card`}
             >
                 <div className="relative">
+                    <AnimatePresence>
+                        {isProcessing && (
+                            <motion.div
+                                key="processing-overlay"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/60 z-10 flex items-center justify-center"
+                            >
+                                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                     <AspectRatio ratio={2 / 3} className="bg-charcoal/20">
                         <AnimatePresence>
                             {loading && (

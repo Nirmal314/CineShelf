@@ -11,7 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import MovieCard from '../movie-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../ui/context-menu'
-import { Clapperboard, Trash2 } from 'lucide-react'
+import { Clapperboard, Trash2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { removeMovie, shiftMovies } from '@/actions/movies'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
@@ -19,17 +19,17 @@ import { tryCatch } from '@/lib/try-catch'
 import { UserMovie } from '@/types'
 import { toast } from 'sonner'
 
-const SortableMovieItem = ({ movie, swapping, onRemove }: { movie: UserMovie, swapping: boolean, onRemove: (m: UserMovie) => void }) => {
+const SortableMovieItem = ({ movie, swapping, onRemove, isRemoving }: { movie: UserMovie, swapping: boolean, onRemove: (m: UserMovie) => void, isRemoving?: boolean }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: movie.id })
 
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition,
+        transition: transition || 'transform 250ms ease',
         zIndex: isDragging ? 9999 : 1,
     }
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="flex h-full">
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex h-full transition-all duration-300 ${isRemoving ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}>
             <ContextMenu>
                 <ContextMenuTrigger>
                     <MovieCard
@@ -56,6 +56,7 @@ const SortableMovieItem = ({ movie, swapping, onRemove }: { movie: UserMovie, sw
 const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
     const id = useId()
     const [movies, setMovies] = useState<UserMovie[]>(initialMovies)
+    const [movieToRemove, setMovieToRemove] = useState<UserMovie | null>(null)
 
     useEffect(() => {
         setMovies(initialMovies)
@@ -64,6 +65,7 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
     const [open, setOpen] = useState(false)
     const [selectedMovie, setSelectedMovie] = useState<UserMovie | null>(null)
     const [swapping, setSwapping] = useState(false)
+    const [isRemoving, setIsRemoving] = useState(false)
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -79,15 +81,24 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
 
     const handleRemove = async () => {
         if (!selectedMovie) return
-        const res = await tryCatch(removeMovie(selectedMovie.id))
-        if (res.error) {
-            console.error("Failed to delete movie:", res.error)
-            toast.error(res.error.message || "Failed to delete movie.")
-        } else {
-            setMovies(prev => prev.filter(m => m.id !== selectedMovie.id))
+        setIsRemoving(true)
+        const { error } = await tryCatch(removeMovie(selectedMovie.id))
+        if (error) {
+            toast.error(error.message || "Failed to delete movie.")
+            setIsRemoving(false)
+            return
         }
+
+        toast.success(`"${selectedMovie.title}" removed from your shelf!`)
+        setMovieToRemove(selectedMovie)
         setOpen(false)
-        setSelectedMovie(null)
+
+        setTimeout(() => {
+            setMovies(prev => prev.filter(m => m.id !== selectedMovie.id))
+            setSelectedMovie(null)
+            setIsRemoving(false)
+            setMovieToRemove(null)
+        }, 300)
     }
 
     const handleDragEnd = async (event: DragEndEvent) => {
@@ -104,17 +115,10 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
 
         setMovies(arrayMove(movies, oldIndex, newIndex))
 
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(0)
-            }, 2000);
-        })
+        const { error } = await tryCatch(shiftMovies(active.id.toString(), over.id.toString()))
 
-        const res = await tryCatch(shiftMovies(active.id.toString(), over.id.toString()))
-
-        if (res.error) {
-            console.error("Swap failed:", res.error)
-            toast.error(res.error.message || "Swap failed!")
+        if (error) {
+            toast.error(error.message || "Swap failed!")
             setMovies(prevMovies)
         }
 
@@ -123,8 +127,8 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
 
     return (
         <div>
-            {movies.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-96 text-primary">
+            {movies.length === 0 && !movieToRemove ? (
+                <div className="flex flex-col items-center justify-center h-96 text-gray-500">
                     <p className="text-lg">No movies added yet!</p>
                     <p className="text-sm">Start by searching and adding your favorite films.</p>
                 </div>
@@ -141,14 +145,14 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
                     >
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
                             {movies.map((movie) => (
-                                <SortableMovieItem key={movie.id} movie={movie} swapping={swapping} onRemove={confirm} />
+                                <SortableMovieItem key={movie.id} movie={movie} swapping={swapping} onRemove={confirm} isRemoving={movie.id === movieToRemove?.id} />
                             ))}
                         </div>
                     </SortableContext>
                 </DndContext>
             )}
 
-            <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialog open={open} onOpenChange={(o) => !isRemoving && setOpen(o)}>
                 <AlertDialogContent className='bg-secondary'>
                     <AlertDialogHeader>
                         <AlertDialogTitle className='mb-6 text-2xl'>One less movie on the shelf?</AlertDialogTitle>
@@ -158,10 +162,11 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className='flex-col'>
-                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleRemove}>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleRemove} disabled={isRemoving}>
+                            {isRemoving && <Loader2 className='w-4 h-4 mr-2 animate-spin' />}
                             Yes, Remove
                         </AlertDialogAction>
-                        <AlertDialogCancel className='!bg-primary/10 hover:!bg-primary/15 transition-colors duration-200 border !border-primary'>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className='!bg-primary/10 hover:!bg-primary/15 transition-colors duration-200 border !border-primary' disabled={isRemoving}>Cancel</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
