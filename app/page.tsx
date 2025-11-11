@@ -9,7 +9,6 @@ const Index = async () => {
     return <Home />
 
   return <Movies session={session} />
-
 };
 
 export default Index;

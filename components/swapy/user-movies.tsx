@@ -34,7 +34,7 @@ const SortableMovieItem = ({ movie, swapping, onRemove }: { movie: UserMovie, sw
                 <ContextMenuTrigger>
                     <MovieCard
                         movie={movie}
-                        className='min-w-56 cursor-grab active:cursor-grabbing w-full'
+                        className='min-w-40 md:min-w-56 cursor-grab active:cursor-grabbing w-full'
                         disabled={swapping}
                     />
                 </ContextMenuTrigger>
@@ -133,7 +133,7 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
                     items={movies.map(m => m.id)}
                     strategy={rectSortingStrategy}
                 >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
                         {movies.map((movie) => (
                             <SortableMovieItem key={movie.id} movie={movie} swapping={swapping} onRemove={confirm} />
                         ))}
