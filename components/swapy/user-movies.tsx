@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useId, useState } from 'react'
+import React, { useId, useState, useEffect } from 'react'
 import { DndContext, closestCenter, DragEndEvent, useSensors, useSensor, PointerSensor } from '@dnd-kit/core'
 import {
     arrayMove,
@@ -56,6 +56,11 @@ const SortableMovieItem = ({ movie, swapping, onRemove }: { movie: UserMovie, sw
 const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
     const id = useId()
     const [movies, setMovies] = useState<UserMovie[]>(initialMovies)
+
+    useEffect(() => {
+        setMovies(initialMovies)
+    }, [initialMovies])
+
     const [open, setOpen] = useState(false)
     const [selectedMovie, setSelectedMovie] = useState<UserMovie | null>(null)
     const [swapping, setSwapping] = useState(false)

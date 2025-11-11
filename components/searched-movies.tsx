@@ -42,7 +42,7 @@ const SearchedMovies = ({ movies, error }: Props) => {
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogContent className="w-full sm:max-w-xl max-h-[90vh] rounded-xl bg-secondary border-none">
+            <AlertDialogContent className="w-full sm:max-w-xl max-h-[90vh] rounded-xl bg-secondary border-none flex flex-col">
                 <AlertDialogHeader>
                     <div className="flex items-center justify-between">
                         <div>
