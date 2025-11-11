@@ -123,23 +123,30 @@ const UserMovies = ({ movies: initialMovies }: { movies: UserMovie[] }) => {
 
     return (
         <div>
-            <DndContext
-                id={id} // Fixes hydration
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                sensors={sensors}
-            >
-                <SortableContext
-                    items={movies.map(m => m.id)}
-                    strategy={rectSortingStrategy}
+            {movies.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-96 text-primary">
+                    <p className="text-lg">No movies added yet!</p>
+                    <p className="text-sm">Start by searching and adding your favorite films.</p>
+                </div>
+            ) : (
+                <DndContext
+                    id={id} // Fixes hydration
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                    sensors={sensors}
                 >
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
-                        {movies.map((movie) => (
-                            <SortableMovieItem key={movie.id} movie={movie} swapping={swapping} onRemove={confirm} />
-                        ))}
-                    </div>
-                </SortableContext>
-            </DndContext>
+                    <SortableContext
+                        items={movies.map(m => m.id)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
+                            {movies.map((movie) => (
+                                <SortableMovieItem key={movie.id} movie={movie} swapping={swapping} onRemove={confirm} />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
+            )}
 
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogContent className='bg-secondary'>

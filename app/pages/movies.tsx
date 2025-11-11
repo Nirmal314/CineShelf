@@ -1,18 +1,20 @@
 import { ProfileButton } from '@/components/profile-button'
-import SearchMovies from '@/components/search-movies'
-import MoviesGrid from '@/components/movies-grid'
+import SearchBar from '@/components/search-movies'
 import { Session } from 'next-auth'
 import React, { Suspense } from 'react'
+import MoviesLoader from '@/components/loaders/movies-loader'
+import { getUserMovies } from '@/actions/movies'
+import UserMovies from '@/components/swapy/user-movies'
 
 const Movies = async ({ session }: { session: Session }) => {
+    const movies = await getUserMovies();
+
     return (
         <div className="pt-20 md:pt-10 relative z-10 flex min-h-screen items-start justify-center px-4 sm:px-6 md:px-8">
-            <div>
-                <Suspense fallback={<div className='text-primary text-3xl animate-pulse duration-300'>Searching movies...</div>}>
-                    <SearchMovies />
-                </Suspense>
-                <Suspense fallback={<div className='text-primary text-3xl animate-pulse duration-300'>Loading movies...</div>}>
-                    <MoviesGrid />
+            <div className='min-w-1/2'>
+                <SearchBar />
+                <Suspense fallback={<MoviesLoader />}>
+                    <UserMovies movies={movies} />
                 </Suspense>
             </div>
 
